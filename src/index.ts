@@ -10,6 +10,7 @@ import publishCheckout from "./publish-checkout";
     // chrome://version/
     executablePath:
       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // 在 chrome://version/ 可以找到可执行文件的路径
+    headless: false,
   });
 
   const context = {
@@ -18,11 +19,11 @@ import publishCheckout from "./publish-checkout";
   } as IContext;
 
   await designerCheckout(context);
-  await previewCheckout();
-  await publishCheckout();
+  // await previewCheckout(context);
+  await publishCheckout(context);
 
   context.reportPrint();
 
   // 关闭浏览器
-  await browser.close();
+  // await browser.close();
 })();

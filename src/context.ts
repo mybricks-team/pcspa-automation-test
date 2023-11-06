@@ -8,8 +8,7 @@ export interface IContext {
   reportPrint: () => void;
 }
 
-// context.js
-const context = {
+const context: IContext = {
   browser: null,
   report: [],
   reportPrint() {

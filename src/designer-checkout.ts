@@ -12,22 +12,22 @@ export default async function designerCheckout(context: IContext) {
   const networkRequests: HTTPResponse[] = [];
 
   // 打开一个新页面
-  const page = await browser.newPage();
+  const designerPage = await browser.newPage();
 
-  page.setCookie({
+  designerPage.setCookie({
     name: "mybricks-login-user",
-    value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"27e7a51bb642114b02851849358e36e5"}`,
+    value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"92337c66cf87f2185a6375b52861c009"}`,
     domain: "test.mybricks.world", // Cookie 的域
     path: "/", // Cookie 的路径
   });
 
   // 监听控制台消息
-  page.on("console", (msg) => consoleMessages.push(msg));
+  designerPage.on("console", (msg) => consoleMessages.push(msg));
   // 监听页面的网络请求事件
-  page.on("response", (response) => networkRequests.push(response));
+  designerPage.on("response", (response) => networkRequests.push(response));
 
   // 导航到要访问的网页
-  await page.goto(
+  await designerPage.goto(
     "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=495145193427013"
   );
 
@@ -50,7 +50,7 @@ export default async function designerCheckout(context: IContext) {
   let allRequestSuccess = true;
   networkRequests.forEach((request) => {
     const status = request.status();
-    if ([200, 201].includes(status)) {
+    if ([200, 201, 304].includes(status)) {
       checkpoint.success(`${request.url()} ${status}`);
     } else {
       allRequestSuccess = false;

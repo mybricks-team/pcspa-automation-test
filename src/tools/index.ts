@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { Browser, Page } from "puppeteer-core";
 
 /** 从字符串中提取版本号信息 */
 export function getVersionFromStr(inputString: string) {
@@ -31,4 +32,38 @@ export function createAndWriteFileSync(
   fs.writeFileSync(filePath, fileContent);
 
   console.log(`文件已创建并写入：${filePath}`);
+}
+
+/** 根据关键字获取网页 */
+export async function getPage(
+  browser: Browser,
+  searchString: string
+): Promise<Page | null> {
+  return (
+    (await browser.pages()).find((page) => page.url().includes("index.html")) ||
+    null
+  );
+}
+
+export async function waitAndClick(page: Page, selector: string) {
+  await page.waitForSelector(selector);
+  await page.click(selector);
+}
+
+export async function waitAndInputValue(
+  page: Page,
+  selector: string,
+  value: string
+) {
+  await page.waitForSelector(selector);
+  await page.evaluate(
+    (selector, value) => {
+      const commitInfoTextArea = document.querySelector(selector)! as
+        | HTMLTextAreaElement
+        | HTMLInputElement;
+      commitInfoTextArea.value = value;
+    },
+    selector,
+    value
+  );
 }
