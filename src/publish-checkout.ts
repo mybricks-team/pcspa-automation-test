@@ -50,7 +50,7 @@ export default async function publishCheckout(context: IContext) {
         designerPage.locator('::-p-xpath(//*[@id=\\"envType\\"])'),
         designerPage.locator(":scope >>> #envType"),
       ])
-        .setTimeout(5000)
+        .setTimeout(timeout)
         .click({
           offset: {
             x: 243.5,
@@ -68,7 +68,7 @@ export default async function publishCheckout(context: IContext) {
           ":scope >>> div.rc-virtual-list-holder > div > div > div > div"
         ),
       ])
-        .setTimeout(5000)
+        .setTimeout(timeout)
         .click({
           offset: {
             x: 135,
@@ -85,7 +85,7 @@ export default async function publishCheckout(context: IContext) {
         designerPage.locator('::-p-xpath(//*[@id=\\"commitInfo\\"])'),
         designerPage.locator(":scope >>> #commitInfo"),
       ])
-        .setTimeout(5000)
+        .setTimeout(timeout)
         .fill("自动脚本测试发布");
     }
 

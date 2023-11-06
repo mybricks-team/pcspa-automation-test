@@ -23,6 +23,8 @@ export default async function previewCheckout(context: IContext) {
     "#root > div > div > div > div > button:nth-child(3)"
   );
 
+  await new Promise((res) => setTimeout(() => res(1), 300));
+
   // 找到预览页
   const previewPage = await getPage(browser, "preview.html");
 
@@ -38,8 +40,8 @@ export default async function previewCheckout(context: IContext) {
 
   previewPage.reload();
 
-  // 等待一段时间以确保控制台输出已经收集
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  // 等待预览页面渲染完成
+  await previewPage.waitForSelector("#root > div");
 
   consoleMessages.forEach((msg) => {
     const text = msg.text();
