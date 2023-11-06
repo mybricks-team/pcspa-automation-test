@@ -25,5 +25,5 @@ import publishCheckout from "./publish-checkout";
   context.reportPrint();
 
   // 关闭浏览器
-  // await browser.close();
+  await browser.close();
 })();
