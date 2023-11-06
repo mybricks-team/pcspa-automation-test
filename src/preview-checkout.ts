@@ -1,15 +1,18 @@
 import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
 import { Checkpoint } from "./checkpoint";
 import { IContext } from "./context";
-import { getPage, getVersionFromStr } from "./tools";
+import {
+  analysisConsoleMessages,
+  analysisNetworkRequests,
+  getPage,
+  getVersionFromStr,
+  waitForSelectorAndCollectedInformation,
+} from "./tools";
 
 export default async function previewCheckout(context: IContext) {
   const checkpoint = new Checkpoint(context, "preview");
 
   const { browser } = context;
-
-  const consoleMessages: ConsoleMessage[] = [];
-  const networkRequests: HTTPResponse[] = [];
 
   const designerPage = await getPage(browser, "index.html");
 
@@ -23,46 +26,25 @@ export default async function previewCheckout(context: IContext) {
     "#root > div > div > div > div > button:nth-child(3)"
   );
 
-  await new Promise((res) => setTimeout(() => res(1), 300));
+  // 等待新预览页的创建
+  const newPageTarget = await browser.waitForTarget((target) =>
+    target.url().includes("preview.html")
+  );
 
-  // 找到预览页
-  const previewPage = await getPage(browser, "preview.html");
+  // 切换到预览页
+  const previewPage = await newPageTarget.page();
 
-  if (!previewPage) {
-    checkpoint.error("找不到预览页");
-    return;
-  }
+  const { consoleMessages, networkRequests } =
+    await waitForSelectorAndCollectedInformation(previewPage, "#root > div");
 
-  // 监听控制台消息
-  previewPage.on("console", (msg) => consoleMessages.push(msg));
-  // 监听页面的网络请求事件
-  previewPage.on("response", (response) => networkRequests.push(response));
+  const { mybricksInfo, errorMessages } =
+    analysisConsoleMessages(consoleMessages);
+  const { errorRequests } = analysisNetworkRequests(networkRequests);
 
-  previewPage.reload();
-
-  // 等待预览页面渲染完成
-  await previewPage.waitForSelector("#root > div");
-
-  consoleMessages.forEach((msg) => {
-    const text = msg.text();
-    if (text.includes("@mybricks/render-web")) {
-      checkpoint.info(
-        `渲染器的版本：@mybricks/render-web@${getVersionFromStr(text)}`
-      );
-    }
-  });
-
-  let allRequestSuccess = true;
-  networkRequests.forEach((request) => {
-    const status = request.status();
-    if ([200, 201, 304].includes(status)) {
-      checkpoint.success(`${request.url()} ${status}`);
-    } else {
-      allRequestSuccess = false;
-      checkpoint.error(`${request.url()} ${status}`);
-    }
-  });
-  if (allRequestSuccess) {
-    checkpoint.success("所有请求成功");
-  }
+  mybricksInfo.forEach((info) => checkpoint.info(info));
+  errorMessages.forEach((msg) => checkpoint.error(msg.text()));
+  errorRequests.forEach((req) =>
+    checkpoint.error(`${req.url()} ${req.status()}`)
+  );
+  checkpoint.info("检查完毕");
 }

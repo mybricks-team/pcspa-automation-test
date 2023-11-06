@@ -1,15 +1,17 @@
 import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
 import { IContext } from "./context";
-import { getVersionFromStr } from "./tools";
+import {
+  analysisConsoleMessages,
+  analysisNetworkRequests,
+  getVersionFromStr,
+  waitForSelectorAndCollectedInformation,
+} from "./tools";
 import { Checkpoint } from "./checkpoint";
 
 export default async function designerCheckout(context: IContext) {
   const checkpoint = new Checkpoint(context, "designer");
 
   const { browser } = context;
-
-  const consoleMessages: ConsoleMessage[] = [];
-  const networkRequests: HTTPResponse[] = [];
 
   // 打开一个新页面
   const designerPage = await browser.newPage();
@@ -21,43 +23,25 @@ export default async function designerCheckout(context: IContext) {
     path: "/", // Cookie 的路径
   });
 
-  // 监听控制台消息
-  designerPage.on("console", (msg) => consoleMessages.push(msg));
-  // 监听页面的网络请求事件
-  designerPage.on("response", (response) => networkRequests.push(response));
-
   // 导航到要访问的网页
-  await designerPage.goto(
+  designerPage.goto(
     "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=495145193427013"
   );
 
+  const { consoleMessages, networkRequests } =
+    await waitForSelectorAndCollectedInformation(
+      designerPage,
+      "#_mybricks-geo-webview_"
+    );
 
-  await designerPage.waitForSelector("#_mybricks-geo-webview_");
+  const { mybricksInfo, errorMessages } =
+    analysisConsoleMessages(consoleMessages);
+  const { errorRequests } = analysisNetworkRequests(networkRequests);
 
-  consoleMessages.forEach((msg) => {
-    const text = msg.text();
-    if (text.includes("@mybricks/designer-spa")) {
-      checkpoint.info(
-        `引擎的版本：@mybricks/designer-spa@${getVersionFromStr(text)}`
-      );
-    } else if (text.includes("@mybricks/render-web")) {
-      checkpoint.info(
-        `渲染器的版本：@mybricks/render-web@${getVersionFromStr(text)}`
-      );
-    }
-  });
-
-  let allRequestSuccess = true;
-  networkRequests.forEach((request) => {
-    const status = request.status();
-    if ([200, 201, 304].includes(status)) {
-      checkpoint.success(`${request.url()} ${status}`);
-    } else {
-      allRequestSuccess = false;
-      checkpoint.error(`${request.url()} ${status}`);
-    }
-  });
-  if (allRequestSuccess) {
-    checkpoint.success("所有请求成功");
-  }
+  mybricksInfo.forEach((info) => checkpoint.info(info));
+  errorMessages.forEach((msg) => checkpoint.error(msg.text()));
+  errorRequests.forEach((req) =>
+    checkpoint.error(`${req.url()} ${req.status()}`)
+  );
+  checkpoint.info("检查完毕");
 }
