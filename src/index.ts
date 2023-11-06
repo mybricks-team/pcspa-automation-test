@@ -19,7 +19,7 @@ import publishCheckout from "./publish-checkout";
   } as IContext;
 
   await designerCheckout(context);
-  // await previewCheckout(context);
+  await previewCheckout(context);
   await publishCheckout(context);
 
   context.reportPrint();

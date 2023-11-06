@@ -40,7 +40,7 @@ export async function getPage(
   searchString: string
 ): Promise<Page | null> {
   return (
-    (await browser.pages()).find((page) => page.url().includes("index.html")) ||
+    (await browser.pages()).find((page) => page.url().includes(searchString)) ||
     null
   );
 }

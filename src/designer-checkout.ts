@@ -31,8 +31,8 @@ export default async function designerCheckout(context: IContext) {
     "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=495145193427013"
   );
 
-  // 等待一段时间以确保控制台输出已经收集
-  await new Promise((res) => setTimeout(() => res(1), 10000));
+
+  await designerPage.waitForSelector("#_mybricks-geo-webview_");
 
   consoleMessages.forEach((msg) => {
     const text = msg.text();

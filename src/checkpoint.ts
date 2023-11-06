@@ -7,19 +7,19 @@ export class Checkpoint {
   }
 
   success(msg: string) {
-    const message = `[${this.name}] success: ${msg}`;
+    const message = `[${this.name}] success: ${msg.slice(0, 300)}`;
     this.context.report.push(message);
     console.log(message);
   }
 
   error(msg: string) {
-    const message = `[${this.name}] error: ${msg}`;
+    const message = `[${this.name}] error: ${msg.slice(0, 300)}`;
     this.context.report.push(message);
     console.log(message);
   }
 
   info(msg: string) {
-    const message = `[${this.name}] info: ${msg}`;
+    const message = `[${this.name}] info: ${msg.slice(0, 300)}`;
     this.context.report.push(message);
     console.log(message);
   }
