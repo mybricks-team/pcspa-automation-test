@@ -1,7 +1,12 @@
 import { ConsoleMessage, HTTPResponse, Locator } from "puppeteer-core";
 import { Checkpoint } from "./checkpoint";
 import { IContext } from "./context";
-import { getPage, waitAndClick, waitAndInputValue } from "./tools";
+import {
+  getPage,
+  waitAndClick,
+  waitAndInputValue,
+  waitForSelectorAndCollectedInformation,
+} from "./tools";
 
 export default async function publishCheckout(context: IContext) {
   const timeout = 5000;
@@ -9,7 +14,7 @@ export default async function publishCheckout(context: IContext) {
 
   const { browser } = context;
 
-  checkpoint.info("获取设计页");
+  checkpoint.log("获取设计页");
   const designerPage = await getPage(browser, "index.html");
 
   if (!designerPage) {
@@ -17,11 +22,11 @@ export default async function publishCheckout(context: IContext) {
     return;
   }
 
-  checkpoint.info(`切换到设计页标签: ${designerPage.url()}`);
+  checkpoint.log(`切换到设计页标签: ${designerPage.url()}`);
   await designerPage.bringToFront();
 
   try {
-    checkpoint.info("点击发布按钮");
+    checkpoint.log("点击发布按钮");
     {
       await Locator.race([
         designerPage.locator("::-p-aria(发布)"),
@@ -42,7 +47,7 @@ export default async function publishCheckout(context: IContext) {
       await new Promise((res) => setTimeout(() => res(1), 300));
     }
 
-    checkpoint.info("选择发布环境");
+    checkpoint.log("选择发布环境");
     {
       await Locator.race([
         designerPage.locator("::-p-aria(* 发布环境 :)"),
@@ -77,19 +82,19 @@ export default async function publishCheckout(context: IContext) {
         });
     }
 
-    checkpoint.info("填写发布信息");
+    checkpoint.log("填写发布信息");
     {
       await Locator.race([
         designerPage.locator("::-p-aria(* 发布内容 :)"),
-        designerPage.locator("#commitInfo"),
-        designerPage.locator('::-p-xpath(//*[@id=\\"commitInfo\\"])'),
-        designerPage.locator(":scope >>> #commitInfo"),
+        designerPage.locator("#commitlog"),
+        designerPage.locator('::-p-xpath(//*[@id=\\"commitlog\\"])'),
+        designerPage.locator(":scope >>> #commitlog"),
       ])
         .setTimeout(timeout)
         .fill("自动脚本测试发布");
     }
 
-    checkpoint.info("点击发布弹窗中的发布按钮");
+    checkpoint.log("点击发布弹窗中的发布按钮");
     {
       await Locator.race([
         designerPage.locator(
@@ -111,7 +116,7 @@ export default async function publishCheckout(context: IContext) {
         });
     }
 
-    checkpoint.info("打开发布后的页面");
+    checkpoint.log("打开发布后的页面");
     {
       await Locator.race([
         designerPage.locator(
@@ -140,33 +145,19 @@ export default async function publishCheckout(context: IContext) {
 
   await new Promise((res) => setTimeout(() => res(1), 300));
 
-  checkpoint.info("获取发布页");
-  const publishedPage = await getPage(browser, "mfs/app/pcpage");
+  // 等待发布页的创建
+  const newPageTarget = await browser.waitForTarget((target) =>
+    target.url().includes("mfs/app/pcpage/test/")
+  );
 
-  if (!publishedPage) {
-    checkpoint.error("找不到发布页");
-    return;
-  }
+  // 切换到发布页
+  const publishedPage = await newPageTarget.page();
 
-  checkpoint.info(`切换到发布页标签: ${publishedPage.url()}`);
-  await publishedPage.bringToFront();
+  await waitForSelectorAndCollectedInformation(
+    publishedPage,
+    "#mybricks-page-root > div",
+    checkpoint
+  );
 
-  await publishedPage.waitForSelector("#mybricks-page-root > div");
-
-  // 获取所有的 src
-  const scriptSrcs = await publishedPage.evaluate(() => {
-    const scriptElements = document.querySelectorAll("script");
-    const srcArray = [];
-    scriptElements.forEach((script) => {
-      const src = script.getAttribute("src");
-      if (src) {
-        srcArray.push(src);
-      }
-    });
-    return srcArray;
-  });
-
-  const renderWebSrc = scriptSrcs.find((src) => src.includes("render-web"));
-  const renderWebVersion = renderWebSrc.match(/\/([\d.]+)\//)[1];
-  checkpoint.info(`渲染器的版本：@mybricks/render-web@${renderWebVersion}`);
+  checkpoint.info("检查完毕");
 }

@@ -2,8 +2,6 @@ import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
 import { Checkpoint } from "./checkpoint";
 import { IContext } from "./context";
 import {
-  analysisConsoleMessages,
-  analysisNetworkRequests,
   getPage,
   getVersionFromStr,
   waitForSelectorAndCollectedInformation,
@@ -26,7 +24,7 @@ export default async function previewCheckout(context: IContext) {
     "#root > div > div > div > div > button:nth-child(3)"
   );
 
-  // 等待新预览页的创建
+  // 等待预览页的创建
   const newPageTarget = await browser.waitForTarget((target) =>
     target.url().includes("preview.html")
   );
@@ -34,17 +32,11 @@ export default async function previewCheckout(context: IContext) {
   // 切换到预览页
   const previewPage = await newPageTarget.page();
 
-  const { consoleMessages, networkRequests } =
-    await waitForSelectorAndCollectedInformation(previewPage, "#root > div");
-
-  const { mybricksInfo, errorMessages } =
-    analysisConsoleMessages(consoleMessages);
-  const { errorRequests } = analysisNetworkRequests(networkRequests);
-
-  mybricksInfo.forEach((info) => checkpoint.info(info));
-  errorMessages.forEach((msg) => checkpoint.error(msg.text()));
-  errorRequests.forEach((req) =>
-    checkpoint.error(`${req.url()} ${req.status()}`)
+  await waitForSelectorAndCollectedInformation(
+    previewPage,
+    "#root > div",
+    checkpoint
   );
+
   checkpoint.info("检查完毕");
 }

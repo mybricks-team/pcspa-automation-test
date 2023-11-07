@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { Browser, ConsoleMessage, HTTPResponse, Page } from "puppeteer-core";
+import { Checkpoint } from "../checkpoint";
 
 /** 从字符串中提取版本号信息 */
 export function getVersionFromStr(inputString: string) {
@@ -73,7 +74,8 @@ export async function waitAndInputValue(
  */
 export async function waitForSelectorAndCollectedInformation(
   page: Page,
-  selector: string
+  selector: string,
+  checkpoint: Checkpoint
 ) {
   const consoleMessages: ConsoleMessage[] = [];
   const networkRequests: HTTPResponse[] = [];
@@ -92,6 +94,9 @@ export async function waitForSelectorAndCollectedInformation(
   // 停止监听响应事件
   page.off("response", onResponse);
 
+  handleConsoleMessages(consoleMessages, checkpoint);
+  handleNetworkRequests(networkRequests, checkpoint);
+
   return {
     consoleMessages,
     networkRequests,
@@ -99,59 +104,50 @@ export async function waitForSelectorAndCollectedInformation(
 }
 
 /**
- * 解析控制台输出信息
+ * 处理控制台输出信息
  */
-export function analysisConsoleMessages(consoleMessages: ConsoleMessage[]) {
-  const errorMessages = consoleMessages.filter((msg) => msg.type() === "error");
-  const warningMessages = consoleMessages.filter(
-    (msg) => msg.type() === "warning"
-  );
-  const infoMessages = consoleMessages.filter((msg) => msg.type() === "info");
-  const logMessages = consoleMessages.filter((msg) => msg.type() === "log");
+export function handleConsoleMessages(
+  consoleMessages: ConsoleMessage[],
+  checkpoint: Checkpoint
+) {
+  consoleMessages
+    .filter((msg) => msg.type() === "error")
+    .forEach((msg) => checkpoint.error(msg.text()));
 
-  const mybricksInfo = consoleMessages
-    .map((msg) => msg.text())
-    .map((inputString) => {
-      const match = inputString.match(/%c\s+(.*?)\s+%c@(.*?)\s+/);
-      if (match) {
-        // 提取匹配的部分并拼接成目标字符串
-        const packageName = match[1];
-        const packageVersion = match[2];
-        const result = `${packageName}@${packageVersion}`;
-        return result;
-      } else {
-        // 如果没有匹配，返回空字符串或者其他错误处理方式
-        return "";
-      }
-    })
-    .filter((text) => text.includes("@mybricks"));
+  consoleMessages
+    .filter((msg) => msg.type() === "warning")
+    .forEach((msg) => checkpoint.warn(msg.text()));
 
-  return {
-    errorMessages,
-    warningMessages,
-    infoMessages,
-    logMessages,
-    mybricksInfo,
-  };
+  consoleMessages
+    .filter((msg) => msg.type() === "info")
+    .forEach((msg) => checkpoint.log(msg.text()));
+
+  consoleMessages
+    .filter((msg) => msg.type() === "log")
+    .forEach((msg) => checkpoint.log(msg.text()));
+
+  checkpoint.info("mybricks 相关包加载情况 ↓↓↓");
+  consoleMessages.forEach((msg) => {
+    const match = msg.text().match(/%c\s+(.*?)\s+%c@(.*?)\s+/); //  取出{包名@版本号}
+    match && checkpoint.info(`${match[1]}@${match[2]}`);
+  });
 }
 
 /**
- * 解析网络请求信息
+ * 处理网络请求信息
  */
-export function analysisNetworkRequests(networkRequests: HTTPResponse[]) {
-  const successRequests = networkRequests.filter(
-    (request) =>
-      (request.status() >= 200 && request.status() < 300) ||
-      request.status() === 304
-  );
-  const errorRequests = networkRequests.filter(
-    (request) =>
+export function handleNetworkRequests(
+  networkRequests: HTTPResponse[],
+  checkpoint: Checkpoint
+) {
+  networkRequests.forEach((request) => {
+    if (
       request.status() < 200 ||
       (request.status() >= 300 && request.status() !== 304)
-  );
-
-  return {
-    successRequests,
-    errorRequests,
-  };
+    ) {
+      checkpoint.error(`${request.url()} ${request.statusText()}`);
+    } else {
+      checkpoint.success(`${request.url()} ${request.statusText()}`);
+    }
+  });
 }

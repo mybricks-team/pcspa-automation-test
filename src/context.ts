@@ -4,7 +4,10 @@ import { createAndWriteFileSync } from "./tools";
 
 export interface IContext {
   browser: Browser;
-  report: string[];
+  report: {
+    type: string;
+    message: string;
+  }[];
   reportPrint: () => void;
 }
 
@@ -14,7 +17,14 @@ const context: IContext = {
   reportPrint() {
     createAndWriteFileSync(
       path.resolve(__dirname, "../report.txt"),
-      this.report.join("\n")
+      this.report.map((item) => item.message).join("\n")
+    );
+    createAndWriteFileSync(
+      path.resolve(__dirname, "../key-information.txt"),
+      this.report
+        .filter((item) => ["info", "error", "warn"].includes(item.type))
+        .map((item) => item.message)
+        .join("\n")
     );
   },
 };

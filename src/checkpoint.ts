@@ -7,20 +7,33 @@ export class Checkpoint {
   }
 
   success(msg: string) {
-    const message = `[${this.name}] success: ${msg.slice(0, 300)}`;
-    this.context.report.push(message);
-    console.log(message);
+    this.baseCheck("success", msg);
+  }
+
+  warn(msg: string) {
+    this.baseCheck("warn", msg);
   }
 
   error(msg: string) {
-    const message = `[${this.name}] error: ${msg.slice(0, 300)}`;
-    this.context.report.push(message);
-    console.log(message);
+    this.baseCheck("error", msg);
   }
 
+  // log 普通信息检查、日志打印
+  log(msg: string) {
+    this.baseCheck("log", msg);
+  }
+
+  // info 关键信息检查
   info(msg: string) {
-    const message = `[${this.name}] info: ${msg.slice(0, 300)}`;
-    this.context.report.push(message);
+    this.baseCheck("info", msg);
+  }
+
+  private baseCheck(type: string, msg: string) {
+    const message = `[${this.name}] ${type}: ${msg.slice(0, 300)}`;
+    this.context.report.push({
+      message,
+      type,
+    });
     console.log(message);
   }
 }

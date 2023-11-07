@@ -1,8 +1,6 @@
 import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
 import { IContext } from "./context";
 import {
-  analysisConsoleMessages,
-  analysisNetworkRequests,
   getVersionFromStr,
   waitForSelectorAndCollectedInformation,
 } from "./tools";
@@ -28,20 +26,11 @@ export default async function designerCheckout(context: IContext) {
     "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=495145193427013"
   );
 
-  const { consoleMessages, networkRequests } =
-    await waitForSelectorAndCollectedInformation(
-      designerPage,
-      "#_mybricks-geo-webview_"
-    );
-
-  const { mybricksInfo, errorMessages } =
-    analysisConsoleMessages(consoleMessages);
-  const { errorRequests } = analysisNetworkRequests(networkRequests);
-
-  mybricksInfo.forEach((info) => checkpoint.info(info));
-  errorMessages.forEach((msg) => checkpoint.error(msg.text()));
-  errorRequests.forEach((req) =>
-    checkpoint.error(`${req.url()} ${req.status()}`)
+  await waitForSelectorAndCollectedInformation(
+    designerPage,
+    "#_mybricks-geo-webview_",
+    checkpoint
   );
+
   checkpoint.info("检查完毕");
 }
