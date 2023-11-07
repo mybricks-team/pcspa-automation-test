@@ -145,9 +145,9 @@ export function handleNetworkRequests(
       request.status() < 200 ||
       (request.status() >= 300 && request.status() !== 304)
     ) {
-      checkpoint.error(`${request.url()} ${request.statusText()}`);
+      checkpoint.error(`${request.url()} ${request.status()}`);
     } else {
-      checkpoint.success(`${request.url()} ${request.statusText()}`);
+      checkpoint.success(`${request.url()} ${request.status()}`);
     }
   });
 }
