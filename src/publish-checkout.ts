@@ -152,6 +152,7 @@ export default async function publishCheckout(context: IContext) {
 
   // 切换到发布页
   const publishedPage = await newPageTarget.page();
+  publishedPage.reload();
 
   await waitForSelectorAndCollectedInformation(
     publishedPage,

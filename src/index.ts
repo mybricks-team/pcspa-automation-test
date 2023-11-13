@@ -11,7 +11,7 @@ import publishCheckout from "./publish-checkout";
       // chrome://version/
       executablePath:
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // 在 chrome://version/ 可以找到可执行文件的路径
-      headless: true,
+      headless: false,
     });
 
     const context = {

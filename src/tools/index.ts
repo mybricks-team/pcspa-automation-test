@@ -1,6 +1,12 @@
 import path from "path";
 import fs from "fs";
-import { Browser, ConsoleMessage, HTTPResponse, Page } from "puppeteer-core";
+import {
+  Browser,
+  ConsoleMessage,
+  HTTPRequest,
+  HTTPResponse,
+  Page,
+} from "puppeteer-core";
 import { Checkpoint } from "../checkpoint";
 
 /** 从字符串中提取版本号信息 */
@@ -78,24 +84,39 @@ export async function waitForSelectorAndCollectedInformation(
   checkpoint: Checkpoint
 ) {
   const consoleMessages: ConsoleMessage[] = [];
-  const networkRequests: HTTPResponse[] = [];
+  const networkRequests: HTTPRequest[] = [];
+  const networkResponse: HTTPResponse[] = [];
 
   const onConsole = (msg: ConsoleMessage) => consoleMessages.push(msg);
-  const onResponse = (response: HTTPResponse) => networkRequests.push(response);
+  const onRequest = (request: HTTPRequest) => networkRequests.push(request);
+  const onResponse = (response: HTTPResponse) => networkResponse.push(response);
 
   // 监听控制台消息
   page.on("console", onConsole);
-  // 监听页面的网络请求事件
+  // 监听页面的网络请求事件发出
+  page.on("request", onRequest);
+  // 监听页面的网络请求事件响应
   page.on("response", onResponse);
 
   await page.waitForSelector(selector);
+
+  await new Promise((res) => {
+    checkpoint.log("等待所有网络请求响应");
+    const interval = setInterval(() => {
+      if (networkRequests.length === networkResponse.length) {
+        checkpoint.log("所有网络请求均已响应");
+        clearInterval(interval);
+        res(1);
+      }
+    }, 200);
+  });
 
   page.off("console", onConsole);
   // 停止监听响应事件
   page.off("response", onResponse);
 
   handleConsoleMessages(consoleMessages, checkpoint);
-  handleNetworkRequests(networkRequests, checkpoint);
+  handleNetworkResponse(networkResponse, checkpoint);
 
   return {
     consoleMessages,
@@ -136,7 +157,7 @@ export function handleConsoleMessages(
 /**
  * 处理网络请求信息
  */
-export function handleNetworkRequests(
+export function handleNetworkResponse(
   networkRequests: HTTPResponse[],
   checkpoint: Checkpoint
 ) {
