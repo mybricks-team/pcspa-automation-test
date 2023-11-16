@@ -371,8 +371,6 @@ export async function setterCheck(context: IContext) {
             y: 15.484375,
           },
         });
-
-      await new Promise((res) => setTimeout(() => res(1), 2000));
     }
     {
       await Locator.race([designerPage.locator("::-p-text(位于文字后)")])
