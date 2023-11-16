@@ -1,12 +1,12 @@
 import { ConsoleMessage, HTTPResponse, Locator } from "puppeteer-core";
-import { Checkpoint } from "./checkpoint";
-import { IContext } from "./context";
+import { Checkpoint } from "../../checkpoint";
+import { IContext } from "../../context";
 import {
   getPage,
   waitAndClick,
   waitAndInputValue,
   waitForSelectorAndCollectedInformation,
-} from "./tools";
+} from "../../tools";
 
 export default async function publishCheckout(context: IContext) {
   const timeout = 5000;
@@ -123,7 +123,7 @@ export default async function publishCheckout(context: IContext) {
           `div[class^="version_publishContainer"] > div > div > div > div:nth-of-type(2) > div:nth-of-type(1) div[class^="version_body"] > div:nth-of-type(1)`
         ),
       ])
-        .setTimeout(timeout)
+        .setTimeout(timeout + 30000)
         .click({
           offset: {
             x: 66,
@@ -141,6 +141,7 @@ export default async function publishCheckout(context: IContext) {
     }
   } catch (e) {
     checkpoint.error("发布失败");
+    throw e;
   }
 
   await new Promise((res) => setTimeout(() => res(1), 300));

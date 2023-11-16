@@ -1,10 +1,10 @@
 import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
-import { IContext } from "./context";
+import { IContext } from "../../context";
 import {
   getVersionFromStr,
   waitForSelectorAndCollectedInformation,
-} from "./tools";
-import { Checkpoint } from "./checkpoint";
+} from "../../tools";
+import { Checkpoint } from "../../checkpoint";
 
 export default async function designerCheckout(context: IContext) {
   const checkpoint = new Checkpoint(context, "designer");
@@ -16,14 +16,14 @@ export default async function designerCheckout(context: IContext) {
 
   designerPage.setCookie({
     name: "mybricks-login-user",
-    value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"92337c66cf87f2185a6375b52861c009"}`,
+    value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"b7287b126373722138d278d0ce026bc1"}`,
     domain: "test.mybricks.world", // Cookie 的域
     path: "/", // Cookie 的路径
   });
 
   // 导航到要访问的网页
   designerPage.goto(
-    "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=495145193427013"
+    "https://test.mybricks.world/mybricks-app-pcspa/index.html?id=500863948435525"
   );
 
   await waitForSelectorAndCollectedInformation(

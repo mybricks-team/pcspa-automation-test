@@ -1,11 +1,11 @@
 import { ConsoleMessage, HTTPResponse } from "puppeteer-core";
-import { Checkpoint } from "./checkpoint";
-import { IContext } from "./context";
+import { Checkpoint } from "../../checkpoint";
+import { IContext } from "../../context";
 import {
   getPage,
   getVersionFromStr,
   waitForSelectorAndCollectedInformation,
-} from "./tools";
+} from "../../tools";
 
 export default async function previewCheckout(context: IContext) {
   const checkpoint = new Checkpoint(context, "preview");
