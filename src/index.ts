@@ -18,7 +18,7 @@ import { setterCheck } from "./cases/setter-check";
   } as IContext;
 
   try {
-    // await baseCheck(context);
+    await baseCheck(context);
     await setterCheck(context);
 
     // 关闭浏览器
