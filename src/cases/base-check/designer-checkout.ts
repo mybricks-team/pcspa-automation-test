@@ -7,19 +7,14 @@ import {
 import { Checkpoint } from "../../checkpoint";
 
 export default async function designerCheckout(context: IContext) {
-  const checkpoint = new Checkpoint(context, "designer");
+  const { browser, cookies } = context;
 
-  const { browser } = context;
+  const checkpoint = new Checkpoint(context, "designer");
 
   // 打开一个新页面
   const designerPage = await browser.newPage();
 
-  designerPage.setCookie({
-    name: "mybricks-login-user",
-    value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"b7287b126373722138d278d0ce026bc1"}`,
-    domain: "test.mybricks.world", // Cookie 的域
-    path: "/", // Cookie 的路径
-  });
+  designerPage.setCookie(...cookies);
 
   // 导航到要访问的网页
   designerPage.goto(

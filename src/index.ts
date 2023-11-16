@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer-core";
 import baseContext, { IContext } from "./context";
 import { baseCheck } from "./cases/base-check";
+import { setterCheck } from "./cases/setter-check";
 
 (async () => {
   // 创建一个 Puppeteer 浏览器实例
@@ -17,7 +18,8 @@ import { baseCheck } from "./cases/base-check";
   } as IContext;
 
   try {
-    await baseCheck(context);
+    // await baseCheck(context);
+    await setterCheck(context);
 
     // 关闭浏览器
     await browser.close();

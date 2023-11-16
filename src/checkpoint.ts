@@ -1,6 +1,8 @@
 import { IContext } from "./context";
 
 export class Checkpoint {
+  assertBreak = false;
+
   constructor(public context: IContext, public name: string) {
     this.context = context;
     this.name = name;
@@ -26,6 +28,18 @@ export class Checkpoint {
   // info 关键信息检查
   info(msg: string) {
     this.baseCheck("info", msg);
+  }
+
+  // 断言
+  assert(msg: string, answer: boolean) {
+    if (answer) {
+      this.success(`断言：“${msg}”为 True`);
+    } else {
+      this.error(`断言：“${msg}”为 False`);
+      if (this.assertBreak) {
+        throw new Error(`断言：“${msg}”为 False`);
+      }
+    }
   }
 
   private baseCheck(type: string, msg: string) {

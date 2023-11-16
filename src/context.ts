@@ -1,9 +1,10 @@
 import path from "path";
-import { Browser } from "puppeteer-core";
+import { Browser, Protocol } from "puppeteer-core";
 import { createAndWriteFileSync } from "./tools";
 
 export interface IContext {
   browser: Browser;
+  cookies: Protocol.Network.CookieParam[];
   report: {
     type: string;
     message: string;
@@ -13,6 +14,14 @@ export interface IContext {
 
 const context: IContext = {
   browser: null,
+  cookies: [
+    {
+      name: "mybricks-login-user",
+      value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"b7287b126373722138d278d0ce026bc1"}`,
+      domain: "test.mybricks.world", // Cookie 的域
+      path: "/", // Cookie 的路径
+    },
+  ],
   report: [],
   reportPrint() {
     createAndWriteFileSync(
