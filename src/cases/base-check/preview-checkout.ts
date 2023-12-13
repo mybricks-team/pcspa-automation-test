@@ -21,7 +21,7 @@ export default async function previewCheckout(context: IContext) {
 
   // 点击预览按钮
   await designerPage.click(
-    "#root > div > div > div > div > button:nth-child(3)"
+    "#root > div > div > div > div > button:nth-child(4)"
   );
 
   // 等待预览页的创建
