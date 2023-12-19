@@ -17,7 +17,7 @@ const context: IContext = {
   cookies: [
     {
       name: "mybricks-login-user",
-      value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"b7287b126373722138d278d0ce026bc1"}`,
+      value: `{"id":483208459444293,"email":"wudi27@kuaishou.com","fingerprint":"78d6b6643654e057a81bd7d76333edae"}`,
       domain: "test.mybricks.world", // Cookie 的域
       path: "/", // Cookie 的路径
     },
