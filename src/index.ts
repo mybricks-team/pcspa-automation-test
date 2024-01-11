@@ -1,8 +1,11 @@
 import puppeteer from "puppeteer-core";
 import baseContext, { IContext } from "./context";
-import { baseCheck } from "./pc-cases/base-check";
-import { setterCheck } from "./pc-cases/setter-check";
-import { scenesCheck } from "./pc-cases/scenes-check";
+import { pcCaseRun } from "./pc-cases";
+import { cdmCaseRun } from "./cdm-cases";
+
+const appType = process.argv
+  .find((item) => item.includes("--appType"))
+  .split("--apptype=")[1];
 
 (async () => {
   // 创建一个 Puppeteer 浏览器实例
@@ -19,9 +22,8 @@ import { scenesCheck } from "./pc-cases/scenes-check";
   } as IContext;
 
   try {
-    await baseCheck(context);
-    await setterCheck(context);
-    await scenesCheck(context);
+    if (appType === "pc") await pcCaseRun(context);
+    if (appType === "cdm") await cdmCaseRun(context);
 
     // 关闭浏览器
     await browser.close();

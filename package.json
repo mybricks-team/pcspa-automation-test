@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start:pc": "ts-node src/index.ts --appType=pc",
+    "start:cdm": "ts-node src/index.ts --appType=cdm"
   },
   "keywords": [],
   "author": "",
