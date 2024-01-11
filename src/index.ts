@@ -1,8 +1,8 @@
 import puppeteer from "puppeteer-core";
 import baseContext, { IContext } from "./context";
-import { baseCheck } from "./cases/base-check";
-import { setterCheck } from "./cases/setter-check";
-import { scenesCheck } from "./cases/scenes-check";
+import { baseCheck } from "./pc-cases/base-check";
+import { setterCheck } from "./pc-cases/setter-check";
+import { scenesCheck } from "./pc-cases/scenes-check";
 
 (async () => {
   // 创建一个 Puppeteer 浏览器实例
